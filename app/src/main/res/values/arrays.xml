@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer-array name="notificationNums">
-        <item>0</item>
+    <string-array name="notificationNums">
         <item>1</item>
         <item>2</item>
         <item>3</item>
@@ -12,5 +11,5 @@
         <item>8</item>
         <item>9</item>
         <item>10</item>
-    </integer-array>
+    </string-array>
 </resources>
