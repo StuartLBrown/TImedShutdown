@@ -11,5 +11,4 @@ public class SettingsStorage {
     public static int minute=0;
     public static int hour=0;
     public static int minutes = (Calendar.getInstance().getTime().getMinutes() + (Calendar.getInstance().getTime().getHours()*60))-((hour * 60)+minute);
-    public static boolean notifications=true;
 }
