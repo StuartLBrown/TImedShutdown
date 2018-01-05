@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.solarmojo13.timedshutdown">
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-sdk android:minSdkVersion="16"/>
 
     <application
         android:allowBackup="true"

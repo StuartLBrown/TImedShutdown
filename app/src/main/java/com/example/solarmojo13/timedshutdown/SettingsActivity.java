@@ -10,31 +10,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
-public class SettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class SettingsActivity extends AppCompatActivity {
     private final int[] NOTIFCATION_NUMS = {1,2,3,4,5,6,7,8,9,10};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         Intent intent = getIntent();
-        Spinner spinner = (Spinner)findViewById(R.id.spnNumNotifications);
-        spinner.setOnItemSelectedListener(this);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.notificationNums,android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        final CheckBox checkBox = (CheckBox)findViewById(R.id.chkTime);
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(checkBox.isChecked()){
+                    SettingsStorage.timeLayout=true;
+                }
+                else SettingsStorage.timeLayout=false;
+            }
+        });
     }
     public void revert(View view){
         Intent intent = new Intent(this,MainActivity.class);
         startActivity(intent);
-    }
-    public void onItemSelected(AdapterView<?> parent,View view, int pos, long id){
-        SettingsStorage.numNotifications = Integer.parseInt(parent.getItemAtPosition(pos).toString());
-    }
-    public void onNothingSelected(AdapterView<?> parent){
-
     }
 }

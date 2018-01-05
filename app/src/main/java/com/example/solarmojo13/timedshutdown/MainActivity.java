@@ -1,5 +1,6 @@
 package com.example.solarmojo13.timedshutdown;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TimePicker;
 
 import java.io.Console;
@@ -49,7 +51,11 @@ public class MainActivity extends AppCompatActivity {
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                finalHour = SettingsStorage.hour;
+                finalMinute = SettingsStorage.minute;
+                timePicker.setEnabled(false);
+                btnConfirm.setEnabled(false);
+                setNotification();
             }
         });
     }
@@ -57,19 +63,20 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this,SettingsActivity.class);
         startActivity(intent);
     }
-    public void confirm(View view){
-        final TimePicker timePicker = (TimePicker) findViewById(R.id.timerShutdown);
-        final Button btnConfirm = (Button) findViewById(R.id.btnConfirm);
-        finalHour = SettingsStorage.hour;
-        finalMinute = SettingsStorage.minute;
-        timePicker.setEnabled(false);
-        btnConfirm.setEnabled(false);
+
+    public void setNotification(){
         String CHANNEL_ID = "01";
-        android.support.v4.app.NotificationCompat.Builder builder = new android.support.v4.app.NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.notification)
-                .setContentTitle("Shutdown time set")
-                .setContentText("Shutdown in " + SettingsStorage.minutes + " minutes");
-        builder.build();
+        String text = "";
+        if(SettingsStorage.timeLayout){
+            text = "Shutdown the phone in " + SettingsStorage.hours + " hours and " + SettingsStorage.minutes + " minutes";
+        }
+        else{
+            text = "Shutdown the phone in " + SettingsStorage.minutes + " minutes";
+        }
+        Notification.Builder builder = new Notification.Builder(this).setContentTitle("Shutdown time set").setContentText(text)
+                .setSmallIcon(R.drawable.notification);
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(01,builder.build());
     }
     private void reset(){
         final TimePicker tp = (TimePicker) findViewById(R.id.timerShutdown);
