@@ -16,7 +16,6 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
 public class SettingsActivity extends AppCompatActivity {
-    private final int[] NOTIFCATION_NUMS = {1,2,3,4,5,6,7,8,9,10};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

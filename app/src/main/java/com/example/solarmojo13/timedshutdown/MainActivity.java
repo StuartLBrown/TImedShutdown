@@ -1,11 +1,16 @@
 package com.example.solarmojo13.timedshutdown;
 
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.nfc.Tag;
 import android.os.PowerManager;
 import android.os.Process;
@@ -20,14 +25,12 @@ import android.webkit.ConsoleMessage;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
-import java.io.Console;
-import java.sql.Time;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
-    private int finalHour;
-    private int finalMinute;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,14 +39,10 @@ public class MainActivity extends AppCompatActivity {
         final TimePicker timePicker = (TimePicker) findViewById(R.id.timerShutdown);
         final Button btnConfirm = (Button) findViewById(R.id.btnConfirm);
         final ImageButton imgbtnSetting = (ImageButton) findViewById(R.id.imgbtnSetting);
-        SettingsStorage.hour= timePicker.getCurrentHour();
-        SettingsStorage.minute = timePicker.getCurrentMinute();
         timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
             @Override
             public void onTimeChanged(TimePicker view, int hourOfDay, int _minute) {
                 if (timePicker.isEnabled()) {
-                    SettingsStorage.hour = timePicker.getCurrentHour();
-                    SettingsStorage.minute = timePicker.getCurrentMinute();
                     btnConfirm.setEnabled(true);
                 }
             }
@@ -51,11 +50,19 @@ public class MainActivity extends AppCompatActivity {
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finalHour = SettingsStorage.hour;
-                finalMinute = SettingsStorage.minute;
+                SettingsStorage.hour = timePicker.getCurrentHour();
+                SettingsStorage.minute = timePicker.getCurrentMinute();
                 timePicker.setEnabled(false);
                 btnConfirm.setEnabled(false);
                 setNotification();
+                String text = "";
+                if(SettingsStorage.timeLayout){
+                    text = "Shutdown the phone in " + SettingsStorage.getHours() + " hours and " + SettingsStorage.getMinutes() + " minutes";
+                }
+                else{
+                    text = "Shutdown the phone in " + SettingsStorage.getMinutes() + " minutes";
+                }
+                scheduleNotification(getNotification(text),1000);
             }
         });
     }
@@ -65,18 +72,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setNotification(){
-        String CHANNEL_ID = "01";
         String text = "";
         if(SettingsStorage.timeLayout){
-            text = "Shutdown the phone in " + SettingsStorage.hours + " hours and " + SettingsStorage.minutes + " minutes";
+            text = "Shutdown the phone in " + SettingsStorage.getHours() + " hours and " + SettingsStorage.getMinutes() + " minutes";
         }
         else{
-            text = "Shutdown the phone in " + SettingsStorage.minutes + " minutes";
+            text = "Shutdown the phone in " + SettingsStorage.getMinutes() + " minutes";
         }
         Notification.Builder builder = new Notification.Builder(this).setContentTitle("Shutdown time set").setContentText(text)
                 .setSmallIcon(R.drawable.notification);
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(01,builder.build());
+        notificationManager.notify(SettingsStorage.ID,builder.build());
+    }
+    private void scheduleNotification(Notification notification, int delay) {
+
+        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+        notificationIntent.putExtra("" + SettingsStorage.ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,6000,futureInMillis,pendingIntent);
+        //alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
+
+    private Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Test" + SystemClock.uptimeMillis());
+        builder.setContentText(content);
+        builder.setSmallIcon(R.drawable.notification);
+        return builder.build();
     }
     private void reset(){
         final TimePicker tp = (TimePicker) findViewById(R.id.timerShutdown);
