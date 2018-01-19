@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.setTheme(R.style.Theme_AppCompat_Light);
         reset();
         final TimePicker timePicker = (TimePicker) findViewById(R.id.timerShutdown);
         final Button btnConfirm = (Button) findViewById(R.id.btnConfirm);
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     text = "Shutdown the phone in " + SettingsStorage.getMinutes() + " minutes";
                 }
-                scheduleNotification(getNotification(text),1000);
+                scheduleNotification(getNotification(text,"Shutdown time in future"),SettingsStorage.delay);
             }
         });
     }
@@ -84,22 +85,21 @@ public class MainActivity extends AppCompatActivity {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(SettingsStorage.ID,builder.build());
     }
-    private void scheduleNotification(Notification notification, int delay) {
-
+    private void scheduleNotification(Notification notification, long delay) {
         Intent notificationIntent = new Intent(this, NotificationPublisher.class);
         notificationIntent.putExtra("" + SettingsStorage.ID, 1);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        long futureInMillis = SystemClock.elapsedRealtime() + delay;
         AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,6000,futureInMillis,pendingIntent);
+        if(SettingsStorage.getMinutes()<=0&&SettingsStorage.getHours()<=0)
+            alarmManager.cancel(pendingIntent);
+        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,20000,delay,pendingIntent);
         //alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
     }
 
-    private Notification getNotification(String content) {
+    private Notification getNotification(String content,String title) {
         Notification.Builder builder = new Notification.Builder(this);
-        builder.setContentTitle("Test" + SystemClock.uptimeMillis());
+        builder.setContentTitle(title);
         builder.setContentText(content);
         builder.setSmallIcon(R.drawable.notification);
         return builder.build();

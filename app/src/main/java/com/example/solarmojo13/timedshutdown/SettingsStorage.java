@@ -10,6 +10,7 @@ public class SettingsStorage {
     public static boolean timeLayout=false;
     public static int minute=0;
     public static int hour=0;
+    public static long delay=0;
     public static int getMinutes(){
         Calendar temp = Calendar.getInstance();
         int tHours = temp.get(Calendar.HOUR);
